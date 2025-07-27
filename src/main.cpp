@@ -2,21 +2,21 @@
  Setup your scale and start the sketch WITHOUT a weight on the scale
  Once readings are displayed place the weight on the scale
  Press +/- or a/z to adjust the calibration_factor until the output readings match the known weight
- Arduino pin 6 -> HX711 CLK
- Arduino pin 5 -> HX711 DOUT
+ Arduino pin A0 -> HX711 CLK
+ Arduino pin A1 -> HX711 DT
  Arduino pin 5V -> HX711 VCC
- Arduino pin GND -> HX711 GND 
+ Arduino pin GND -> HX711 GND
 */
 
 #include "HX711.h"
 
-HX711 scale(A1, A0);   // DT, CLK
+HX711 scale(A1, A0); // HX711 DT pin, HX711 CLK pin
 
 float calibration_factor = -3.7; // this calibration factor is adjusted according to my load cell
 float units;
-float ounces;
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
   Serial.println("HX711 calibration sketch");
   Serial.println("Remove all weight from scale");
@@ -25,36 +25,36 @@ void setup() {
   Serial.println("Press - or z to decrease calibration factor");
 
   scale.set_scale();
-  scale.tare();  //Reset the scale to 0
+  scale.tare(); // Reset the scale to 0
 
-  long zero_factor = scale.read_average(); //Get a baseline reading
-  Serial.print("Zero factor: "); //This can be used to remove the need to tare the scale. Useful in permanent scale projects.
+  long zero_factor = scale.read_average(); // Get a baseline reading
+  Serial.print("Zero factor: ");           // This can be used to remove the need to tare the scale. Useful in permanent scale projects.
   Serial.println(zero_factor);
 }
 
-void loop() {
+void loop()
+{
 
-  scale.set_scale(calibration_factor); //Adjust to this calibration factor
+  scale.set_scale(calibration_factor); // Adjust to this calibration factor
 
   Serial.print("Reading: ");
-  units = scale.get_units(), 10;
+  units = scale.get_units(10);
   if (units < 0)
   {
     units = 0.00;
   }
-  ounces = units * 0.035274;
-  Serial.print(ounces);
-  Serial.print(" grams"); 
+  Serial.print(units, 2);
+  Serial.print(" g");
   Serial.print(" calibration_factor: ");
   Serial.print(calibration_factor);
   Serial.println();
 
-  if(Serial.available())
+  if (Serial.available())
   {
     char temp = Serial.read();
-    if(temp == '+' || temp == 'a')
+    if (temp == '+' || temp == 'a')
       calibration_factor += 1;
-    else if(temp == '-' || temp == 'z')
+    else if (temp == '-' || temp == 'z')
       calibration_factor -= 1;
   }
 }
